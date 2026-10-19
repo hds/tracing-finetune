@@ -2,5 +2,38 @@
 name = "tracing-finetune"
 version = "0.1.0"
 edition = "2024"
+license = "MIT"
+rust-version = "1.90"
+authors = ["Hayden Stainsby <hds@caffeineconcepts.com>"]
+readme = "README.md"
+homepage = "https://github.com/hds/tracing-finetune"
+repository = "https://github.com/hds/tracing-finetune"
+description = """
+A tracing filter that can be finetuned to enable or disable specific callsites.
+"""
+categories = ["development-tools::debugging"]
+keywords = ["tracing", "logging", "tracing-subscriber", "debugging"]
 
 [dependencies]
+arc-swap = "1.9.2"
+indexmap = "2.14.2"
+tracing = "0.1"
+tracing-core = "0.1"
+tracing-subscriber = { version = "0.3.23", features = [ "registry" ], default-features = false }
+
+[dev-dependencies]
+tracing-subscriber = { version = "0.3.23", features = [ "registry", "fmt", "std" ], default-features = false }
+tracing-mock = { version = "=0.1.0-beta.3", features = [ "tracing-subscriber" ] }
+
+[lints.clippy]
+cargo = "deny"
+complexity = "deny"
+pedantic = "deny"
+perf = "deny"
+style = "deny"
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.rustdoc]
+broken_intra_doc_links = "deny"
