@@ -7,7 +7,7 @@ This crate provides [`FinetuneFilter`] which implements the [`Filter`] trait fro
 callsites (places where events or spans are created) are recorded. This finetuning can be
 performed at runtime.
 
-[`FinetuneFilter`]: docs.rs/tracing-finetune/latest/tracing_finetune/struct.FinetuneFilter.html
+[`FinetuneFilter`]: https://docs.rs/tracing-finetune/latest/tracing_finetune/struct.FinetuneFilter.html
 [`Filter`]: https://docs.rs/tracing-subscriber/latest/tracing_subscriber/layer/trait.Filter.html
 [`tracing`]: https://docs.rs/tracing
 [`tracing-subscriber`]: https://docs.rs/tracing-subscriber
