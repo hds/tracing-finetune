@@ -380,10 +380,6 @@ impl FinetuneHandle {
             .lock()
             .expect("Callsite records are poisoned!");
 
-        println!(
-            "Upserting: {callsite_id:?} ({callsite_hex:#x})\n    - {meta:?}\n    - {inner_filter_interest:?}",
-            callsite_hex = callsite_id.0
-        );
         callsites
             .entry(callsite_id)
             .and_modify(|callsite| callsite.inner_filter_interest = inner_filter_interest.clone())
