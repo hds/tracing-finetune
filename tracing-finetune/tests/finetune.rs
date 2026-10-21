@@ -2,7 +2,7 @@ use tracing::Level;
 use tracing_mock::{expect, layer};
 use tracing_subscriber::prelude::*;
 
-use tracing_finetune::FinetuneFilter;
+use tracing_finetune::{FinetuneFilter, OverrideStatus};
 
 fn info_event(msg: &str) {
     tracing::info!(target: "finetune", "{}", msg);
@@ -350,6 +350,46 @@ fn disable_does_not_affect_other_callsites() {
 
         warn_event("second warn event");
         other_warn_event();
+    }
+
+    handle.assert_finished();
+}
+
+#[test]
+fn callsites_contain_correct_override_status() {
+    let filter = tracing_subscriber::filter::LevelFilter::WARN;
+    let finetune = FinetuneFilter::new(filter);
+    let finetune_handle = finetune.handle();
+
+    let (layer, handle) = layer::mock().only().run_with_handle();
+
+    let subscriber = tracing_subscriber::registry().with(layer.with_filter(finetune));
+
+    {
+        let _guard = tracing::subscriber::set_default(subscriber);
+
+        info_event("first info event");
+
+        let callsites = finetune_handle.callsites();
+        let info_callsite = get_callsite(&callsites, "finetune", Level::INFO);
+
+        finetune_handle.enable_callsite(info_callsite.id());
+        let callsites = finetune_handle.callsites();
+        let enabled_callsite = get_callsite(&callsites, "finetune", Level::INFO);
+        assert_eq!(enabled_callsite.status(), OverrideStatus::ExplicitlyEnabled);
+
+        finetune_handle.disable_callsite(info_callsite.id());
+        let callsites = finetune_handle.callsites();
+        let disabled_callsite = get_callsite(&callsites, "finetune", Level::INFO);
+        assert_eq!(
+            disabled_callsite.status(),
+            OverrideStatus::ExplicitlyDisabled
+        );
+
+        finetune_handle.clear_callsite_override(info_callsite.id());
+        let callsites = finetune_handle.callsites();
+        let cleared_callsite = get_callsite(&callsites, "finetune", Level::INFO);
+        assert_eq!(cleared_callsite.status(), OverrideStatus::NoOverride);
     }
 
     handle.assert_finished();
