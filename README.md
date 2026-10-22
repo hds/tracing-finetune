@@ -57,8 +57,8 @@ warn_event(); // Explicitly disabled: not emitted
 
 ## Supported Rust Versions
 
-`tracing-finetune` is built against the latest stable release. The minimum supported version is
-1.90 ([What's New in Rust 1.88 through 1.90]). The current version of `tracing-finetune` is not
+`tracing-finetune` is built against the latest stable release. The minimum supported version is 1.90
+([What's New in Rust 1.88 through 1.90]). The current version of `tracing-finetune` is not
 guaranteed to build on Rust versions earlier than the minimum supported version.
 
 The Minimum Supported Rust Version (MSRV) policy is that it won't be updated to a version that
@@ -75,6 +75,5 @@ This project is licensed under the [MIT license].
 
 ### Contribution
 
-Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion
-in `tracing-finetune` by you, shall be licensed as MIT, without any additional terms or
-conditions.
+Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in
+`tracing-finetune` by you, shall be licensed as MIT, without any additional terms or conditions.

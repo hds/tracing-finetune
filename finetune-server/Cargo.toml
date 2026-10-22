@@ -1,0 +1,26 @@
+[package]
+name = "finetune-server"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+rust-version = "1.90"
+authors = ["Hayden Stainsby <hds@caffeineconcepts.com>"]
+readme = "README.md"
+homepage = "https://github.com/hds/tracing-finetune"
+repository = "https://github.com/hds/tracing-finetune"
+description = """
+A web-server that provides an API to control a `tracing-finetune` filter.
+"""
+categories = ["development-tools::debugging", "web-programming::http-server"]
+keywords = ["tracing", "logging", "tracing-subscriber", "debugging", "server"]
+
+[dependencies]
+
+[dev-dependencies]
+axum = { version = "0.8.9", features = [ "macros" ] }
+serde = { version = "1.0.229", features = [ "derive" ] }
+tokio = { version = "1.54.0", features = [ "full" ] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3.23" }
+
+tracing-finetune = { version = "0.1.0", path = "../tracing-finetune" }
