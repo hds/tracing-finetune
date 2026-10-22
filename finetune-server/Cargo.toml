@@ -23,4 +23,4 @@ tokio = { version = "1.54.0", features = [ "full" ] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3.23" }
 
-tracing-finetune = { version = "0.1.0", path = "../tracing-finetune" }
+tracing-finetune = { version = "0.2.0", path = "../tracing-finetune" }
