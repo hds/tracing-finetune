@@ -1,0 +1,65 @@
+# git-cliff ~ default configuration file
+# https://git-cliff.org/docs/configuration
+#
+# Lines starting with "#" are comments.
+# Configuration options are organized into tables and keys.
+# See documentation for more information on available options.
+
+[changelog]
+# remove the leading and trailing whitespace from the template
+trim = true
+
+[git]
+# parse the commits based on https://www.conventionalcommits.org
+conventional_commits = true
+# filter out the commits that are not conventional
+filter_unconventional = true
+# process each line of a commit as an individual commit
+split_commits = false
+# regex for preprocessing the commit messages
+commit_preprocessors = [
+  { pattern = '\((\w+\s)?#([0-9]+)\)', replace = "([#${2}](https://github.com/hds/tracing-finetune/issues/${2}))"}, # replace issue numbers
+]
+# regex for parsing and grouping commits
+commit_parsers = [
+  { message = "^feat", group = "Added" },
+  { message = "^fix", group = "Fixed" },
+  { message = "^doc", group = "Documented" },
+  { message = "^perf", group = "Performance" },
+  { message = "^update", group = "Updated" },
+  { message = "^refactor", skip = true },
+  { message = "^refac", skip = true },
+  { message = "^style", skip = true },
+  { message = "^test", skip = true },
+  { message = "^chore\\(release\\)", skip = true },
+  { message = "[Pp]repare to release", skip = true },
+  { message = "^chore", skip = true },
+  { body = ".*security", group = "Security" },
+  { body = ".*[dD]eprecate.*", group = "Deprecated" },
+  # older non-conventional commits
+  { message = "^subscriber:", group = "Added" },
+  { message = "^console:", group = "Added" },
+  { message = "^api:", group = "Added" },
+  { message = "^example:", group = "Documented" },
+]
+# protect breaking changes from being skipped due to matching a skipping commit_parser
+protect_breaking_commits = false
+# filter out the commits that are not matched by commit parsers
+filter_commits = false
+# regex for skipping tags
+# skip_tags = "v0.1.0-beta.1"
+# regex for ignoring tags
+ignore_tags = ""
+# sort the tags topologically
+topo_order = false
+# sort the commits inside sections by oldest/newest order
+sort_commits = "oldest"
+# limit the number of commits included in the changelog.
+# limit_commits = 42
+
+link_parsers = [
+    { pattern = "[fF]ixes #(\\d+)", text = "fixes [#${1}]", href = "https://github.com/hds/tracing-finetune/issues/$1"},
+    { pattern = "[cC]loses #(\\d+)", text = "closes [#${1}]", href = "https://github.com/hds/tracing-finetune/issues/$1"},
+    { pattern = "[sS]ee #(\\d+)", text = "see [#${1}]", href = "https://github.com/hds/tracing-finetune/issues/$1"},
+]
+
