@@ -106,7 +106,7 @@ pub struct Callsite {
 /// Callsite override status
 ///
 /// This enum specified the override status of a specific callsite for a [`FinetuneFilter`].
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum OverrideStatus {
     /// There is no override present
     NoOverride,
@@ -184,6 +184,19 @@ impl CallsiteId {
     fn new_from_metadata(meta: &Metadata<'_>) -> Self {
         Self(ptr::from_ref(meta) as u64)
     }
+
+    /// Provide a `u64` representation of the `CallsiteId`, which can be used for serialization.
+    #[must_use]
+    pub fn as_u64(&self) -> u64 {
+        self.0
+    }
+}
+
+impl From<u64> for CallsiteId {
+    /// Create a `CallsiteId` from a `u64`, which can be used for deserialization.
+    fn from(value: u64) -> Self {
+        Self(value)
+    }
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
@@ -243,62 +256,93 @@ impl FinetuneHandle {
     /// Enable the given callsite so that it is always recorded.
     ///
     /// Set an override on the finetune filter to always treat the span or event coming from the
-    /// callsite as enabled.
+    /// callsite as enabled. The resulting [`Callsite`] is returned, or `None` if there was no
+    /// callsite registered with this [`CallsiteId`].
     ///
     /// After this call, [`callsite_enabled`] will always return [`Interest::always()`] and
     /// [`enabled`] will always return `true`.
     ///
     /// The override can be removed with [`clear_callsite_override`].
     ///
+    /// # Panics
+    ///
+    /// This method will panic if the internal mutex becomes poisoned.
+    ///
     /// [`callsite_enabled`]: Filter::callsite_enabled
     /// [`enabled`]: Filter::enabled
     /// [`clear_callsite_override`]: Self::clear_callsite_override
-    pub fn enable_callsite(&self, callsite_id: CallsiteId) {
-        self.set_callsite_override(callsite_id, OverrideAction::ExplicitlyEnabled);
+    #[allow(clippy::must_use_candidate)]
+    pub fn enable_callsite(&self, callsite_id: CallsiteId) -> Option<Callsite> {
+        self.set_callsite_override(callsite_id, OverrideAction::ExplicitlyEnabled)
     }
 
     /// Disable the given callsite so that it is never recorded.
     ///
     /// Set an override on the finetune filter to always treat the span or event coming from the
-    /// callsite as disabled.
+    /// callsite as disabled. The resulting [`Callsite`] is returned, or `None` if there was no
+    /// callsite registered with this [`CallsiteId`].
     ///
     /// After this call, [`callsite_enabled`] will always return [`Interest::never()`] and
     /// [`enabled`] will always return `false`.
     ///
     /// The override can be removed with [`clear_callsite_override`].
     ///
+    /// # Panics
+    ///
+    /// This method will panic if the internal mutex becomes poisoned.
+    ///
     /// [`callsite_enabled`]: Filter::callsite_enabled
     /// [`enabled`]: Filter::enabled
     /// [`clear_callsite_override`]: Self::clear_callsite_override
-    pub fn disable_callsite(&self, callsite_id: CallsiteId) {
-        self.set_callsite_override(callsite_id, OverrideAction::ExplicitlyDisabled);
+    #[allow(clippy::must_use_candidate)]
+    pub fn disable_callsite(&self, callsite_id: CallsiteId) -> Option<Callsite> {
+        self.set_callsite_override(callsite_id, OverrideAction::ExplicitlyDisabled)
     }
 
     /// Remove any override present for this callsite.
     ///
     /// This method will remove an override previously set by [`enable_callsite`] or
-    /// [`disable_callsite`].
+    /// [`disable_callsite`]. The resulting [`Callsite`] is returned, or `None` if there was no
+    /// callsite registered with this [`CallsiteId`].
     ///
     /// After this call, [`callsite_enabled`] and [`enabled`] will return the value provided by the
     /// wrapped filter.
+    ///
+    /// # Panics
+    ///
+    /// This method will panic if the internal mutex becomes poisoned.
     ///
     /// [`callsite_enabled`]: Filter::callsite_enabled
     /// [`enabled`]: Filter::enabled
     /// [`enable_callsite`]: Self::enable_callsite
     /// [`disable_callsite`]: Self::disable_callsite
-    pub fn clear_callsite_override(&self, callsite_id: CallsiteId) {
-        self.callsite_overrides.rcu(|callsite_overrides| {
-            let mut callsite_overrides = Vec::<CallsiteOverride>::clone(callsite_overrides);
-            for (idx, callsite_override) in callsite_overrides.iter().enumerate() {
-                if callsite_override.id == callsite_id {
-                    callsite_overrides.swap_remove(idx);
-                    break;
-                }
-            }
+    #[allow(clippy::must_use_candidate)]
+    pub fn clear_callsite_override(&self, callsite_id: CallsiteId) -> Option<Callsite> {
+        let callsite = {
+            let mut callsites = self
+                .callsites
+                .lock()
+                .expect("Callsite records are poisoned!");
+            let callsite = callsites.get_mut(&callsite_id)?;
 
-            callsite_overrides
-        });
+            self.callsite_overrides.rcu(|callsite_overrides| {
+                let mut callsite_overrides = Vec::<CallsiteOverride>::clone(callsite_overrides);
+                for (idx, callsite_override) in callsite_overrides.iter().enumerate() {
+                    if callsite_override.id == callsite_id {
+                        callsite_overrides.swap_remove(idx);
+                        break;
+                    }
+                }
+
+                callsite_overrides
+            });
+            callsite.override_status = OverrideStatus::NoOverride;
+            callsite.clone()
+        };
+
         tracing_core::callsite::rebuild_interest_cache();
+
+        Some(callsite)
     }
 
     /// The callsites that his filter has observed.
@@ -326,47 +370,50 @@ impl FinetuneHandle {
             .lock()
             .expect("Callsite records are poisoned!");
 
-        callsites
-            .values()
-            .map(|c| {
-                let mut callsite = c.clone();
-                let callsite_overrides = self.callsite_overrides.load();
-                for callsite_override in callsite_overrides.iter() {
-                    if callsite_override.id == callsite.id {
-                        callsite.override_status = match callsite_override.action {
-                            OverrideAction::ExplicitlyEnabled => OverrideStatus::ExplicitlyEnabled,
-                            OverrideAction::ExplicitlyDisabled => {
-                                OverrideStatus::ExplicitlyDisabled
-                            }
-                        };
-                    }
-                }
-                callsite
-            })
-            .collect()
+        callsites.values().cloned().collect()
     }
 
-    fn set_callsite_override(&self, callsite_id: CallsiteId, status: OverrideAction) {
-        self.callsite_overrides.rcu(|callsite_overrides| {
-            let mut found = false;
-            let mut callsite_overrides = Vec::<CallsiteOverride>::clone(callsite_overrides);
-            for callsite_override in &mut callsite_overrides {
-                if callsite_override.id == callsite_id {
-                    callsite_override.action = status;
-                    found = true;
-                    break;
-                }
-            }
-            if !found {
-                callsite_overrides.push(CallsiteOverride {
-                    id: callsite_id,
-                    action: status,
-                });
-            }
+    fn set_callsite_override(
+        &self,
+        callsite_id: CallsiteId,
+        action: OverrideAction,
+    ) -> Option<Callsite> {
+        let callsite = {
+            let mut callsites = self
+                .callsites
+                .lock()
+                .expect("Callsite records are poisoned!");
+            let callsite = callsites.get_mut(&callsite_id)?;
 
-            callsite_overrides
-        });
+            self.callsite_overrides.rcu(|callsite_overrides| {
+                let mut found = false;
+                let mut callsite_overrides = Vec::<CallsiteOverride>::clone(callsite_overrides);
+                for callsite_override in &mut callsite_overrides {
+                    if callsite_override.id == callsite_id {
+                        callsite_override.action = action;
+                        found = true;
+                        break;
+                    }
+                }
+                if !found {
+                    callsite_overrides.push(CallsiteOverride {
+                        id: callsite_id,
+                        action,
+                    });
+                }
+
+                callsite_overrides
+            });
+            callsite.override_status = match action {
+                OverrideAction::ExplicitlyEnabled => OverrideStatus::ExplicitlyEnabled,
+                OverrideAction::ExplicitlyDisabled => OverrideStatus::ExplicitlyDisabled,
+            };
+            callsite.clone()
+        };
+
         tracing_core::callsite::rebuild_interest_cache();
+
+        Some(callsite)
     }
 
     fn upsert_callsite(
