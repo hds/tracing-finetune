@@ -30,7 +30,7 @@ jobs:
           toolchain: stable
       - uses: Swatinem/rust-cache@v2
       - name: Run cargo check
-        run: cargo check
+        run: cargo check --all-features --all-targets
 
   test_os:
     name: Tests on ${{ matrix.os }} with Rust ${{ matrix.rust }}
@@ -58,7 +58,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
 
       - name: Run cargo test
-        run: cargo test --workspace
+        run: cargo test --workspace --all-targets
 
       - name: Run cargo doctests
         run: cargo test --workspace --doc
