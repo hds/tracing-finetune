@@ -13,7 +13,6 @@ A web-server that provides an API to control a `tracing-finetune` filter.
 """
 categories = ["development-tools::debugging", "web-programming::http-server"]
 keywords = ["tracing", "logging", "tracing-subscriber", "debugging", "server"]
-publish = false
 
 [features]
 default = []
