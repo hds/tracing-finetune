@@ -13,14 +13,38 @@ A web-server that provides an API to control a `tracing-finetune` filter.
 """
 categories = ["development-tools::debugging", "web-programming::http-server"]
 keywords = ["tracing", "logging", "tracing-subscriber", "debugging", "server"]
+publish = false
+
+[features]
+default = []
+axum-router = [ "dep:axum" ]
 
 [dependencies]
-
-[dev-dependencies]
-axum = { version = "0.8.9", features = [ "macros" ] }
-serde = { version = "1.0.229", features = [ "derive" ] }
-tokio = { version = "1.54.0", features = [ "full" ] }
-tracing = "0.1"
-tracing-subscriber = { version = "0.3.23" }
+axum = { version = "0.8.9", features = [ "json" ], default-features = false, optional = true }
+serde = "1.0.229"
+tracing = { version = "0.1", default-features = false }
 
 tracing-finetune = { version = "0.1.0", path = "../tracing-finetune" }
+
+[dev-dependencies]
+axum = { version = "0.8.9", default-features = true }
+serde_json = "1.0.154"
+tokio = { version = "1.54.1", features = [ "full" ] }
+tracing-subscriber = { version = "0.3.23", default-features = true }
+
+[[example]]
+name = "example-server-axum"
+required-features = ["axum-router"]
+
+[lints.clippy]
+cargo = "deny"
+complexity = "deny"
+pedantic = "deny"
+perf = "deny"
+style = "deny"
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.rustdoc]
+broken_intra_doc_links = "deny"

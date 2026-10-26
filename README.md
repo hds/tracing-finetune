@@ -71,7 +71,7 @@ hasn't been discussed by Jon and Ben on the [Rustacean Station] podcast.
 
 This project is licensed under the [MIT license].
 
-[MIT license]: https://github.com/hds/ari_subscriber/blob/main/LICENSE
+[MIT license]: https://github.com/hds/tracing-finetune/blob/main/LICENSE
 
 ### Contribution
 

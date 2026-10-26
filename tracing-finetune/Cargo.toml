@@ -17,7 +17,7 @@ keywords = ["tracing", "logging", "tracing-subscriber", "debugging"]
 [dependencies]
 arc-swap = "1.9.2"
 indexmap = "2.14.2"
-tracing = "0.1"
+tracing = { version = "0.1", features = [ "std" ], default-features = false }
 tracing-core = "0.1"
 tracing-subscriber = { version = "0.3.23", features = [ "registry" ], default-features = false }
 
