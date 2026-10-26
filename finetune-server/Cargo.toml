@@ -24,7 +24,7 @@ axum = { version = "0.8.9", features = [ "json" ], default-features = false, opt
 serde = "1.0.229"
 tracing = { version = "0.1", default-features = false }
 
-tracing-finetune = { version = "0.1.0", path = "../tracing-finetune" }
+tracing-finetune = { version = "0.1.1", path = "../tracing-finetune" }
 
 [dev-dependencies]
 axum = { version = "0.8.9", default-features = true }
