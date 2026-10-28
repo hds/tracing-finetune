@@ -1,7 +1,7 @@
-#![cfg(feature = "axum-router")]
 use axum::{Router, extract::Request, response::IntoResponse, routing::get};
+use tower_http::{services::ServeDir, trace::TraceLayer};
 use tracing_finetune::FinetuneFilter;
-use tracing_subscriber::prelude::*;
+use tracing_subscriber::{fmt::format::FmtSpan, prelude::*};
 
 use finetune_server::axum::api_router;
 
@@ -11,7 +11,11 @@ async fn main() {
     let finetune = FinetuneFilter::new(filter);
     let finetune_handle = finetune.handle();
     tracing_subscriber::registry()
-        .with(tracing_subscriber::fmt::layer().with_filter(finetune))
+        .with(
+            tracing_subscriber::fmt::layer()
+                .with_span_events(FmtSpan::CLOSE)
+                .with_filter(finetune),
+        )
         .init();
 
     let app = Router::new()
@@ -29,8 +33,10 @@ async fn main() {
                 "Hello, World!\n"
             }),
         )
-        .fallback(default_fallback)
-        .nest("/finetune", api_router(finetune_handle));
+        .nest("/finetune", api_router(finetune_handle))
+        .nest_service("/finetune", ServeDir::new("static"))
+        .layer(TraceLayer::new_for_http())
+        .fallback(default_fallback);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3007").await.unwrap();
     axum::serve(listener, app).await.unwrap();

@@ -1,0 +1,103 @@
+.finetune {
+    font-family: sans-serif;
+    position: absolute;
+}
+
+.finetune .heading {
+    background-color: #7050D5;
+    padding: 12px 10px;
+    margin: 0;
+    color: #fff;
+}
+
+.finetune .heading h2 {
+    padding: 0;
+    margin: 0;
+}
+
+.finetune .heading button {
+    float: right;
+
+}
+
+table.callsites {
+    border-collapse: collapse;
+    margin: 12px 0;
+    font-size: 0.9em;
+    min-width: 400px;
+    border-radius: 6px;
+}
+
+table.callsites thead tr {
+    background-color: #7050D5;
+    color: #fff;
+    text-align: left;
+}
+
+table.callsites th,
+table.callsites td {
+    padding: 8px 10px;
+}
+
+table.callsites tbody tr {
+    background-color: #fbfbfb;
+}
+
+table.callsites tbody tr:nth-of-type(even) {
+    background-color: #f0f0f0;
+}
+
+table.callsites tbody tr:last-of-type {
+    border-bottom: 2px solid #7050d5;
+}
+
+.finetune button {
+    background-color: #fff;
+    border-color: #7d61d5;
+    border-radius: 8px;
+    box-shadow: none;
+    &:hover {
+        color: #fff;
+        background-color: #7d61d5;
+        border-color: #7d61d5;
+    }
+    &:active {
+        color: #fff;
+        background-color: #300F80;
+        border-color: #300f80;
+    }
+    &:disabled,&[disabled] {
+        color: #6d6d6d;
+        background-color: #fff;
+        border-color: #8b7bc9;
+    }
+}
+
+table.callsites a {
+    color: #7d61d5;
+    text-decoration: none;
+
+    &:hover,&:active {
+        text-decoration: underline;
+    }
+}
+
+table.callsites .level-trace {
+    color: #75507b;
+}
+
+table.callsites .level-debug {
+    color: #3465a4;
+}
+
+table.callsites .level-info {
+    color: #4e9a06;
+}
+
+table.callsites .level-warn {
+    color: #c4a000;
+}
+
+table.callsites .level-error {
+    color: #cc0000;
+}
