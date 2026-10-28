@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <title>Finetune</title>
+      <script type="module" src="/finetune/finetune.js"></script>
+      <link rel="stylesheet" type="text/css" href="/finetune/finetune.css">
+      <link rel="icon" href="data:image/png;base64,iVBORw0KGgo=">
+    </head>
+    <body>
+
+        <div class="finetune">
+            <div class="heading">
+                <button id="reload">Reload</button>
+                <h2>Finetune Server</h2>
+            </div>
+
+            <table id="callsites" class="callsites">
+                <thead>
+                    <tr>
+                        <th scope="col">Tune</th>
+                        <th scope="col">Id</th>
+                        <th scope="col">Kind</th>
+                        <th scope="col">Level</th>
+                        <th scope="col">Interest</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Location</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+
+    </body>
+</html>
