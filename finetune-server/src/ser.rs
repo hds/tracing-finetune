@@ -217,7 +217,7 @@ impl Serialize for OverrideStatusWrapper {
                 serializer.serialize_unit_variant("OverrideStatus", 1, "ExplicitlyEnabled")
             }
             OverrideStatus::ExplicitlyDisabled => {
-                serializer.serialize_unit_variant("OverrideStatus", 2, "ExplicityDisabled")
+                serializer.serialize_unit_variant("OverrideStatus", 2, "ExplicitlyDisabled")
             }
         }
     }
