@@ -63,6 +63,27 @@ jobs:
       - name: Run cargo doctests
         run: cargo test --workspace --doc
 
+  test_webapp:
+    name: Test Webapp with Playwright
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v7
+
+      - name: Install stable toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Build example
+        run: cargo build --features axum-router --example example-server-axum
+      - name: Install playwright
+        working-directory: ./finetune-server/tests/webapp
+        run: npm ci && npx playwright install --with-deps chromium
+      - name: Run tests
+        working-directory: ./finetune-server/tests/webapp
+        run: npx playwright test
+
   lints:
     name: Lints
     runs-on: ubuntu-latest

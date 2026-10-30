@@ -1,1 +1,3 @@
 /target
+/finetune-server/tests/webapp/node_modules
+/finetune-server/tests/webapp/test-results
